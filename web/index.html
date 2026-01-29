@@ -1,0 +1,1216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strategic Mineral Dependency Tracker | Atmanirbhar Bharat</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #111827;
+            --bg-card: #1a2234;
+            --bg-card-hover: #1f2937;
+            --accent-danger: #ef4444;
+            --accent-warning: #f59e0b;
+            --accent-success: #10b981;
+            --accent-info: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-cyan: #06b6d4;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: #2d3748;
+            --gradient-danger: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            --gradient-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --gradient-info: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            --gradient-hero: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            background-image: 
+                radial-gradient(ellipse at 20% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(6, 182, 212, 0.05) 0%, transparent 60%);
+        }
+
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+        #root {
+            position: relative;
+            z-index: 1;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+            }
+            50% {
+                box-shadow: 0 0 40px rgba(239, 68, 68, 0.5);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .animate-fade-in {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .animate-slide-in {
+            animation: slideIn 0.5s ease-out forwards;
+        }
+
+        .stagger-1 { animation-delay: 0.1s; opacity: 0; }
+        .stagger-2 { animation-delay: 0.2s; opacity: 0; }
+        .stagger-3 { animation-delay: 0.3s; opacity: 0; }
+        .stagger-4 { animation-delay: 0.4s; opacity: 0; }
+        .stagger-5 { animation-delay: 0.5s; opacity: 0; }
+        .stagger-6 { animation-delay: 0.6s; opacity: 0; }
+    </style>
+</head>
+<body>
+    <div class="bg-pattern"></div>
+    <div class="grid-overlay"></div>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // ==================== COMPONENTS ====================
+
+        const RiskBadge = ({ level }) => {
+            const styles = {
+                critical: { bg: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.4)' },
+                high: { bg: 'rgba(245, 158, 11, 0.2)', color: '#f59e0b', border: '1px solid rgba(245, 158, 11, 0.4)' },
+                moderate: { bg: 'rgba(59, 130, 246, 0.2)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.4)' },
+                low: { bg: 'rgba(16, 185, 129, 0.2)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.4)' }
+            };
+            const style = styles[level] || styles.moderate;
+            
+            return (
+                <span style={{
+                    padding: '4px 12px',
+                    borderRadius: '20px',
+                    fontSize: '11px',
+                    fontWeight: '600',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    backgroundColor: style.bg,
+                    color: style.color,
+                    border: style.border
+                }}>
+                    {level}
+                </span>
+            );
+        };
+
+        const TrendIndicator = ({ trend }) => {
+            const icons = {
+                increasing: '↗',
+                decreasing: '↘',
+                stable: '→'
+            };
+            const colors = {
+                increasing: '#ef4444',
+                decreasing: '#10b981',
+                stable: '#f59e0b'
+            };
+            return (
+                <span style={{ color: colors[trend], fontWeight: '600', fontSize: '16px' }}>
+                    {icons[trend]}
+                </span>
+            );
+        };
+
+        const ProgressBar = ({ value, color, label, showValue = true }) => (
+            <div style={{ marginBottom: '12px' }}>
+                {label && (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                        <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{label}</span>
+                        {showValue && <span style={{ fontSize: '12px', fontWeight: '600', color }}>{value}%</span>}
+                    </div>
+                )}
+                <div style={{
+                    height: '8px',
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    borderRadius: '4px',
+                    overflow: 'hidden'
+                }}>
+                    <div style={{
+                        width: `${value}%`,
+                        height: '100%',
+                        backgroundColor: color,
+                        borderRadius: '4px',
+                        transition: 'width 1s ease-out'
+                    }} />
+                </div>
+            </div>
+        );
+
+        const StatCard = ({ title, value, subtitle, icon, color, delay }) => (
+            <div className={`animate-fade-in stagger-${delay}`} style={{
+                background: 'var(--bg-card)',
+                borderRadius: '16px',
+                padding: '24px',
+                border: '1px solid var(--border-color)',
+                position: 'relative',
+                overflow: 'hidden'
+            }}>
+                <div style={{
+                    position: 'absolute',
+                    top: '-20px',
+                    right: '-20px',
+                    width: '100px',
+                    height: '100px',
+                    background: `radial-gradient(circle, ${color}20 0%, transparent 70%)`,
+                    borderRadius: '50%'
+                }} />
+                <div style={{ fontSize: '28px', marginBottom: '12px' }}>{icon}</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>
+                    {title}
+                </div>
+                <div style={{ fontSize: '36px', fontWeight: '700', color, marginBottom: '4px', fontFamily: 'JetBrains Mono' }}>
+                    {value}
+                </div>
+                <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{subtitle}</div>
+            </div>
+        );
+
+        const Header = () => (
+            <header style={{
+                padding: '20px 40px',
+                borderBottom: '1px solid var(--border-color)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                background: 'rgba(10, 14, 23, 0.8)',
+                backdropFilter: 'blur(10px)',
+                position: 'sticky',
+                top: 0,
+                zIndex: 100
+            }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <div style={{
+                        width: '48px',
+                        height: '48px',
+                        background: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)',
+                        borderRadius: '12px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '24px'
+                    }}>
+                        ⚛
+                    </div>
+                    <div>
+                        <h1 style={{ fontSize: '20px', fontWeight: '700', letterSpacing: '-0.5px' }}>
+                            Strategic Mineral Dependency Tracker
+                        </h1>
+                        <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                            आत्मनिर्भर भारत • Critical Minerals Intelligence Platform
+                        </p>
+                    </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+                    <div style={{
+                        padding: '8px 16px',
+                        background: 'rgba(239, 68, 68, 0.15)',
+                        borderRadius: '8px',
+                        border: '1px solid rgba(239, 68, 68, 0.3)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                    }}>
+                        <div style={{
+                            width: '8px',
+                            height: '8px',
+                            background: '#ef4444',
+                            borderRadius: '50%',
+                            animation: 'pulse-glow 2s infinite'
+                        }} />
+                        <span style={{ fontSize: '13px', fontWeight: '500', color: '#ef4444' }}>
+                            HIGH DEPENDENCY ALERT
+                        </span>
+                    </div>
+                    <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+                        Last Updated: {new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </div>
+                </div>
+            </header>
+        );
+
+        const HeroSection = ({ mineralData }) => {
+            if (!mineralData || mineralData.length === 0) return null;
+            
+            const criticalCount = mineralData.filter(m => m.riskLevel === 'critical').length;
+            const avgDependency = Math.round(mineralData.reduce((sum, m) => sum + m.chinaImport, 0) / mineralData.length);
+            
+            return (
+                <section style={{
+                    padding: '60px 40px',
+                    background: 'var(--gradient-hero)',
+                    borderBottom: '1px solid var(--border-color)',
+                    position: 'relative',
+                    overflow: 'hidden'
+                }}>
+                    <div style={{
+                        position: 'absolute',
+                        top: '50%',
+                        right: '10%',
+                        transform: 'translateY(-50%)',
+                        width: '400px',
+                        height: '400px',
+                        background: 'radial-gradient(circle, rgba(239, 68, 68, 0.1) 0%, transparent 70%)',
+                        borderRadius: '50%',
+                        filter: 'blur(60px)'
+                    }} />
+                    
+                    <div style={{ maxWidth: '800px', position: 'relative', zIndex: 1 }}>
+                        <div className="animate-fade-in" style={{
+                            display: 'inline-block',
+                            padding: '6px 16px',
+                            background: 'rgba(245, 158, 11, 0.15)',
+                            borderRadius: '20px',
+                            border: '1px solid rgba(245, 158, 11, 0.3)',
+                            marginBottom: '20px'
+                        }}>
+                            <span style={{ fontSize: '12px', fontWeight: '600', color: '#f59e0b', letterSpacing: '1px' }}>
+                                🎯 ATMANIRBHAR BHARAT IDEATHON 2025
+                            </span>
+                        </div>
+                        
+                        <h2 className="animate-fade-in stagger-1" style={{
+                            fontSize: '48px',
+                            fontWeight: '800',
+                            lineHeight: '1.1',
+                            marginBottom: '20px',
+                            letterSpacing: '-1px'
+                        }}>
+                            India's Critical Mineral
+                            <br />
+                            <span style={{ 
+                                background: 'linear-gradient(90deg, #ef4444, #f59e0b)',
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent'
+                            }}>
+                                Vulnerability Dashboard
+                            </span>
+                        </h2>
+                        
+                        <p className="animate-fade-in stagger-2" style={{
+                            fontSize: '18px',
+                            color: 'var(--text-secondary)',
+                            lineHeight: '1.6',
+                            marginBottom: '32px',
+                            maxWidth: '600px'
+                        }}>
+                            Real-time intelligence on India's strategic mineral dependencies, supply chain risks, 
+                            and policy recommendations for achieving mineral self-reliance.
+                        </p>
+                        
+                        <div className="animate-fade-in stagger-3" style={{ display: 'flex', gap: '16px' }}>
+                            <div style={{
+                                padding: '16px 24px',
+                                background: 'var(--bg-card)',
+                                borderRadius: '12px',
+                                border: '1px solid var(--border-color)'
+                            }}>
+                                <div style={{ fontSize: '32px', fontWeight: '700', color: '#ef4444', fontFamily: 'JetBrains Mono' }}>
+                                    {avgDependency}%
+                                </div>
+                                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                                    Avg. China Dependency
+                                </div>
+                            </div>
+                            <div style={{
+                                padding: '16px 24px',
+                                background: 'var(--bg-card)',
+                                borderRadius: '12px',
+                                border: '1px solid var(--border-color)'
+                            }}>
+                                <div style={{ fontSize: '32px', fontWeight: '700', color: '#f59e0b', fontFamily: 'JetBrains Mono' }}>
+                                    {criticalCount}
+                                </div>
+                                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                                    Critical Risk Minerals
+                                </div>
+                            </div>
+                            <div style={{
+                                padding: '16px 24px',
+                                background: 'var(--bg-card)',
+                                borderRadius: '12px',
+                                border: '1px solid var(--border-color)'
+                            }}>
+                                <div style={{ fontSize: '32px', fontWeight: '700', color: '#3b82f6', fontFamily: 'JetBrains Mono' }}>
+                                    ₹2.8L Cr
+                                </div>
+                                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                                    Annual Import Value
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        const OverviewStats = ({ mineralData }) => {
+            if (!mineralData || mineralData.length === 0) return null;
+            
+            return (
+                <section style={{ padding: '40px' }}>
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(4, 1fr)',
+                        gap: '20px'
+                    }}>
+                        <StatCard
+                            title="Tracked Minerals"
+                            value={mineralData.length}
+                            subtitle="Strategic & Critical"
+                            icon="⚗️"
+                            color="#3b82f6"
+                            delay={1}
+                        />
+                        <StatCard
+                            title="Critical Risk"
+                            value={mineralData.filter(m => m.riskLevel === 'critical').length}
+                            subtitle="Immediate attention required"
+                            icon="🚨"
+                            color="#ef4444"
+                            delay={2}
+                        />
+                        <StatCard
+                            title="High Risk"
+                            value={mineralData.filter(m => m.riskLevel === 'high').length}
+                            subtitle="Elevated concern"
+                            icon="⚠️"
+                            color="#f59e0b"
+                            delay={3}
+                        />
+                        <StatCard
+                            title="Supply Chain Score"
+                            value="32/100"
+                            subtitle="Resilience index"
+                            icon="🛡️"
+                            color="#8b5cf6"
+                            delay={4}
+                        />
+                    </div>
+                </section>
+            );
+        };
+
+        const MineralCard = ({ mineral, onClick, isSelected }) => (
+            <div
+                onClick={() => onClick(mineral)}
+                style={{
+                    background: isSelected ? 'var(--bg-card-hover)' : 'var(--bg-card)',
+                    borderRadius: '16px',
+                    padding: '24px',
+                    border: isSelected ? '2px solid var(--accent-info)' : '1px solid var(--border-color)',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    position: 'relative',
+                    overflow: 'hidden'
+                }}
+                onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-4px)'}
+                onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+            >
+                <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '4px',
+                    height: '100%',
+                    background: mineral.riskLevel === 'critical' ? '#ef4444' : 
+                               mineral.riskLevel === 'high' ? '#f59e0b' : '#3b82f6'
+                }} />
+                
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+                    <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
+                            <h3 style={{ fontSize: '18px', fontWeight: '600' }}>{mineral.name}</h3>
+                            <span style={{
+                                fontSize: '14px',
+                                fontWeight: '600',
+                                color: 'var(--text-muted)',
+                                fontFamily: 'JetBrains Mono',
+                                background: 'rgba(255,255,255,0.05)',
+                                padding: '2px 8px',
+                                borderRadius: '4px'
+                            }}>
+                                {mineral.symbol}
+                            </span>
+                        </div>
+                        <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{mineral.category}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <TrendIndicator trend={mineral.trend} />
+                        <RiskBadge level={mineral.riskLevel} />
+                    </div>
+                </div>
+                
+                <ProgressBar
+                    value={mineral.chinaImport}
+                    color={mineral.chinaImport > 80 ? '#ef4444' : mineral.chinaImport > 60 ? '#f59e0b' : '#10b981'}
+                    label="China Import Dependency"
+                />
+                
+                <div style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>
+                    <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px' }}>Supply Risk</div>
+                        <div style={{ fontSize: '20px', fontWeight: '700', color: '#ef4444', fontFamily: 'JetBrains Mono' }}>
+                            {mineral.supplyChainRisk}%
+                        </div>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px' }}>Domestic</div>
+                        <div style={{ fontSize: '20px', fontWeight: '700', color: '#10b981', fontFamily: 'JetBrains Mono' }}>
+                            {mineral.domesticProduction}%
+                        </div>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px' }}>Volatility</div>
+                        <div style={{ fontSize: '20px', fontWeight: '700', color: '#f59e0b', fontFamily: 'JetBrains Mono' }}>
+                            {mineral.priceVolatility}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const MineralDetailPanel = ({ mineral }) => {
+            if (!mineral) {
+                return (
+                    <div style={{
+                        background: 'var(--bg-card)',
+                        borderRadius: '16px',
+                        padding: '40px',
+                        border: '1px solid var(--border-color)',
+                        height: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        textAlign: 'center'
+                    }}>
+                        <div>
+                            <div style={{ fontSize: '48px', marginBottom: '16px', opacity: 0.3 }}>⚛</div>
+                            <p style={{ color: 'var(--text-muted)' }}>Select a mineral to view detailed analysis</p>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div style={{
+                    background: 'var(--bg-card)',
+                    borderRadius: '16px',
+                    padding: '28px',
+                    border: '1px solid var(--border-color)',
+                    height: '100%',
+                    overflow: 'auto'
+                }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
+                        <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                                <h2 style={{ fontSize: '28px', fontWeight: '700' }}>{mineral.name}</h2>
+                                <span style={{
+                                    fontSize: '18px',
+                                    fontWeight: '600',
+                                    color: 'var(--accent-cyan)',
+                                    fontFamily: 'JetBrains Mono',
+                                    background: 'rgba(6, 182, 212, 0.1)',
+                                    padding: '4px 12px',
+                                    borderRadius: '6px'
+                                }}>
+                                    {mineral.symbol}
+                                </span>
+                            </div>
+                            <p style={{ color: 'var(--text-secondary)' }}>{mineral.category}</p>
+                        </div>
+                        <RiskBadge level={mineral.riskLevel} />
+                    </div>
+
+                    <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: 'repeat(3, 1fr)',
+                        gap: '16px',
+                        marginBottom: '28px'
+                    }}>
+                        <div style={{
+                            background: 'rgba(239, 68, 68, 0.1)',
+                            borderRadius: '12px',
+                            padding: '16px',
+                            border: '1px solid rgba(239, 68, 68, 0.2)'
+                        }}>
+                            <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                China Dependency
+                            </div>
+                            <div style={{ fontSize: '32px', fontWeight: '700', color: '#ef4444', fontFamily: 'JetBrains Mono' }}>
+                                {mineral.chinaImport}%
+                            </div>
+                        </div>
+                        <div style={{
+                            background: 'rgba(245, 158, 11, 0.1)',
+                            borderRadius: '12px',
+                            padding: '16px',
+                            border: '1px solid rgba(245, 158, 11, 0.2)'
+                        }}>
+                            <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                Total Import
+                            </div>
+                            <div style={{ fontSize: '32px', fontWeight: '700', color: '#f59e0b', fontFamily: 'JetBrains Mono' }}>
+                                {mineral.totalImport}%
+                            </div>
+                        </div>
+                        <div style={{
+                            background: 'rgba(16, 185, 129, 0.1)',
+                            borderRadius: '12px',
+                            padding: '16px',
+                            border: '1px solid rgba(16, 185, 129, 0.2)'
+                        }}>
+                            <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                Domestic Production
+                            </div>
+                            <div style={{ fontSize: '32px', fontWeight: '700', color: '#10b981', fontFamily: 'JetBrains Mono' }}>
+                                {mineral.domesticProduction}%
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style={{ marginBottom: '28px' }}>
+                        <h4 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '16px', color: 'var(--text-secondary)' }}>
+                            5-YEAR CHINA DEPENDENCY TREND
+                        </h4>
+                        <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: '80px' }}>
+                            {mineral.yearlyData.map((value, index) => (
+                                <div key={index} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    <div style={{
+                                        width: '100%',
+                                        height: `${value * 0.8}px`,
+                                        background: index === mineral.yearlyData.length - 1 
+                                            ? 'linear-gradient(180deg, #ef4444 0%, #dc2626 100%)'
+                                            : 'rgba(239, 68, 68, 0.3)',
+                                        borderRadius: '4px 4px 0 0',
+                                        transition: 'height 0.5s ease'
+                                    }} />
+                                    <span style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '8px' }}>
+                                        {2020 + index}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div style={{ marginBottom: '28px' }}>
+                        <h4 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px', color: 'var(--text-secondary)' }}>
+                            STRATEGIC APPLICATIONS
+                        </h4>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                            {mineral.strategicUse.map((use, index) => (
+                                <span key={index} style={{
+                                    padding: '6px 14px',
+                                    background: 'rgba(59, 130, 246, 0.1)',
+                                    border: '1px solid rgba(59, 130, 246, 0.3)',
+                                    borderRadius: '20px',
+                                    fontSize: '12px',
+                                    color: '#3b82f6'
+                                }}>
+                                    {use}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div style={{ marginBottom: '28px' }}>
+                        <h4 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px', color: 'var(--text-secondary)' }}>
+                            🇮🇳 DOMESTIC INITIATIVES
+                        </h4>
+                        <ul style={{ listStyle: 'none', padding: 0 }}>
+                            {mineral.domesticInitiatives.map((initiative, index) => (
+                                <li key={index} style={{
+                                    padding: '10px 14px',
+                                    background: 'rgba(16, 185, 129, 0.05)',
+                                    borderRadius: '8px',
+                                    marginBottom: '8px',
+                                    fontSize: '13px',
+                                    color: 'var(--text-primary)',
+                                    borderLeft: '3px solid #10b981'
+                                }}>
+                                    {initiative}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px', color: 'var(--text-secondary)' }}>
+                            ALTERNATIVE TECHNOLOGIES
+                        </h4>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                            {mineral.alternatives.map((alt, index) => (
+                                <span key={index} style={{
+                                    padding: '6px 14px',
+                                    background: 'rgba(139, 92, 246, 0.1)',
+                                    border: '1px solid rgba(139, 92, 246, 0.3)',
+                                    borderRadius: '20px',
+                                    fontSize: '12px',
+                                    color: '#8b5cf6'
+                                }}>
+                                    {alt}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const MineralsSection = ({ mineralData, selectedMineral, setSelectedMineral }) => {
+            if (!mineralData || mineralData.length === 0) return null;
+            
+            return (
+                <section style={{ padding: '0 40px 40px' }}>
+                    <div style={{ marginBottom: '24px' }}>
+                        <h2 style={{ fontSize: '24px', fontWeight: '700', marginBottom: '8px' }}>
+                            Critical Mineral Analysis
+                        </h2>
+                        <p style={{ color: 'var(--text-secondary)' }}>
+                            Click on any mineral card to view detailed dependency analysis and mitigation strategies
+                        </p>
+                    </div>
+                    
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(2, 1fr)',
+                            gap: '16px',
+                            alignContent: 'start'
+                        }}>
+                            {mineralData.map(mineral => (
+                                <MineralCard
+                                    key={mineral.id}
+                                    mineral={mineral}
+                                    onClick={setSelectedMineral}
+                                    isSelected={selectedMineral?.id === mineral.id}
+                                />
+                            ))}
+                        </div>
+                        <div style={{ position: 'sticky', top: '100px', height: 'fit-content' }}>
+                            <MineralDetailPanel mineral={selectedMineral} />
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        const RiskMatrix = ({ mineralData }) => {
+            if (!mineralData || mineralData.length === 0) return null;
+            
+            return (
+                <section style={{ padding: '40px', background: 'var(--bg-secondary)' }}>
+                    <h2 style={{ fontSize: '24px', fontWeight: '700', marginBottom: '8px' }}>
+                        Risk Assessment Matrix
+                    </h2>
+                    <p style={{ color: 'var(--text-secondary)', marginBottom: '32px' }}>
+                        Supply chain risk vs. China dependency visualization
+                    </p>
+                    
+                    <div style={{
+                        background: 'var(--bg-card)',
+                        borderRadius: '16px',
+                        padding: '32px',
+                        border: '1px solid var(--border-color)',
+                        position: 'relative'
+                    }}>
+                        <div style={{
+                            position: 'absolute',
+                            left: '0',
+                            top: '50%',
+                            transform: 'rotate(-90deg) translateX(-50%)',
+                            fontSize: '12px',
+                            color: 'var(--text-muted)',
+                            whiteSpace: 'nowrap'
+                        }}>
+                            Supply Chain Risk →
+                        </div>
+                        
+                        <div style={{
+                            position: 'absolute',
+                            bottom: '8px',
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            fontSize: '12px',
+                            color: 'var(--text-muted)'
+                        }}>
+                            China Dependency →
+                        </div>
+                        
+                        <div style={{
+                            width: '100%',
+                            height: '400px',
+                            marginLeft: '40px',
+                            marginBottom: '40px',
+                            position: 'relative',
+                            background: `
+                                linear-gradient(to right, rgba(16, 185, 129, 0.1) 0%, rgba(245, 158, 11, 0.1) 50%, rgba(239, 68, 68, 0.1) 100%),
+                                linear-gradient(to top, rgba(16, 185, 129, 0.1) 0%, rgba(245, 158, 11, 0.1) 50%, rgba(239, 68, 68, 0.1) 100%)
+                            `,
+                            borderRadius: '8px',
+                            border: '1px solid var(--border-color)'
+                        }}>
+                            {[25, 50, 75].map(pos => (
+                                <React.Fragment key={pos}>
+                                    <div style={{
+                                        position: 'absolute',
+                                        left: `${pos}%`,
+                                        top: 0,
+                                        bottom: 0,
+                                        width: '1px',
+                                        background: 'rgba(255,255,255,0.05)'
+                                    }} />
+                                    <div style={{
+                                        position: 'absolute',
+                                        top: `${100 - pos}%`,
+                                        left: 0,
+                                        right: 0,
+                                        height: '1px',
+                                        background: 'rgba(255,255,255,0.05)'
+                                    }} />
+                                </React.Fragment>
+                            ))}
+                            
+                            {mineralData.map(mineral => (
+                                <div
+                                    key={mineral.id}
+                                    style={{
+                                        position: 'absolute',
+                                        left: `${mineral.chinaImport}%`,
+                                        bottom: `${mineral.supplyChainRisk}%`,
+                                        transform: 'translate(-50%, 50%)',
+                                        width: '40px',
+                                        height: '40px',
+                                        borderRadius: '50%',
+                                        background: mineral.riskLevel === 'critical' ? 'rgba(239, 68, 68, 0.8)' :
+                                                   mineral.riskLevel === 'high' ? 'rgba(245, 158, 11, 0.8)' : 'rgba(59, 130, 246, 0.8)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        fontSize: '11px',
+                                        fontWeight: '600',
+                                        cursor: 'pointer',
+                                        transition: 'transform 0.2s',
+                                        border: '2px solid rgba(255,255,255,0.2)'
+                                    }}
+                                    onMouseEnter={e => e.currentTarget.style.transform = 'translate(-50%, 50%) scale(1.2)'}
+                                    onMouseLeave={e => e.currentTarget.style.transform = 'translate(-50%, 50%) scale(1)'}
+                                    title={`${mineral.name}: ${mineral.chinaImport}% China Dep., ${mineral.supplyChainRisk}% Risk`}
+                                >
+                                    {mineral.symbol}
+                                </div>
+                            ))}
+                        </div>
+                        
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: '32px', marginTop: '16px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#ef4444' }} />
+                                <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Critical</span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#f59e0b' }} />
+                                <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>High</span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#3b82f6' }} />
+                                <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Moderate</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        const GeopoliticalTimeline = ({ events }) => {
+            if (!events || events.length === 0) return null;
+            
+            return (
+                <section style={{ padding: '40px', background: 'var(--bg-secondary)' }}>
+                    <h2 style={{ fontSize: '24px', fontWeight: '700', marginBottom: '8px' }}>
+                        Geopolitical Events & Supply Chain Disruptions
+                    </h2>
+                    <p style={{ color: 'var(--text-secondary)', marginBottom: '32px' }}>
+                        Recent events impacting India's mineral supply security
+                    </p>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        {events.map((event, index) => (
+                            <div
+                                key={index}
+                                className="animate-slide-in"
+                                style={{
+                                    display: 'flex',
+                                    gap: '20px',
+                                    padding: '20px',
+                                    background: 'var(--bg-card)',
+                                    borderRadius: '12px',
+                                    border: '1px solid var(--border-color)',
+                                    animationDelay: `${index * 0.1}s`
+                                }}
+                            >
+                                <div style={{
+                                    width: '100px',
+                                    flexShrink: 0,
+                                    fontFamily: 'JetBrains Mono',
+                                    fontSize: '14px',
+                                    color: 'var(--text-muted)'
+                                }}>
+                                    {event.date}
+                                </div>
+                                <div style={{
+                                    width: '4px',
+                                    borderRadius: '2px',
+                                    background: event.impact === 'critical' ? '#ef4444' :
+                                               event.impact === 'high' ? '#f59e0b' :
+                                               event.impact === 'positive' ? '#10b981' : '#3b82f6'
+                                }} />
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontSize: '15px', fontWeight: '500', marginBottom: '8px' }}>
+                                        {event.event}
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                        {event.minerals.map((mineral, i) => (
+                                            <span key={i} style={{
+                                                padding: '4px 10px',
+                                                background: 'rgba(255,255,255,0.05)',
+                                                borderRadius: '4px',
+                                                fontSize: '11px',
+                                                color: 'var(--text-secondary)'
+                                            }}>
+                                                {mineral}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div>
+                                    <span style={{
+                                        padding: '4px 12px',
+                                        borderRadius: '4px',
+                                        fontSize: '11px',
+                                        fontWeight: '600',
+                                        textTransform: 'uppercase',
+                                        background: event.impact === 'critical' ? 'rgba(239, 68, 68, 0.2)' :
+                                                   event.impact === 'high' ? 'rgba(245, 158, 11, 0.2)' :
+                                                   event.impact === 'positive' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(59, 130, 246, 0.2)',
+                                        color: event.impact === 'critical' ? '#ef4444' :
+                                              event.impact === 'high' ? '#f59e0b' :
+                                              event.impact === 'positive' ? '#10b981' : '#3b82f6'
+                                    }}>
+                                        {event.impact}
+                                    </span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            );
+        };
+
+        const PolicyRecommendations = ({ recommendations }) => {
+            if (!recommendations || recommendations.length === 0) return null;
+            
+            return (
+                <section style={{ padding: '40px' }}>
+                    <h2 style={{ fontSize: '24px', fontWeight: '700', marginBottom: '8px' }}>
+                        Policy Recommendations
+                    </h2>
+                    <p style={{ color: 'var(--text-secondary)', marginBottom: '32px' }}>
+                        Strategic roadmap for achieving mineral self-reliance
+                    </p>
+                    
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
+                        {recommendations.map((rec, index) => (
+                            <div
+                                key={index}
+                                style={{
+                                    background: 'var(--bg-card)',
+                                    borderRadius: '16px',
+                                    padding: '28px',
+                                    border: '1px solid var(--border-color)'
+                                }}
+                            >
+                                <div style={{
+                                    display: 'inline-block',
+                                    padding: '6px 14px',
+                                    background: index === 0 ? 'rgba(239, 68, 68, 0.15)' :
+                                               index === 1 ? 'rgba(245, 158, 11, 0.15)' : 'rgba(16, 185, 129, 0.15)',
+                                    borderRadius: '20px',
+                                    marginBottom: '20px'
+                                }}>
+                                    <span style={{
+                                        fontSize: '12px',
+                                        fontWeight: '600',
+                                        color: index === 0 ? '#ef4444' : index === 1 ? '#f59e0b' : '#10b981'
+                                    }}>
+                                        {rec.category}
+                                    </span>
+                                </div>
+                                
+                                <ul style={{ listStyle: 'none', padding: 0 }}>
+                                    {rec.items.map((item, i) => (
+                                        <li key={i} style={{
+                                            padding: '12px 0',
+                                            borderBottom: i < rec.items.length - 1 ? '1px solid var(--border-color)' : 'none',
+                                            fontSize: '14px',
+                                            color: 'var(--text-primary)',
+                                            display: 'flex',
+                                            alignItems: 'flex-start',
+                                            gap: '12px'
+                                        }}>
+                                            <span style={{
+                                                color: index === 0 ? '#ef4444' : index === 1 ? '#f59e0b' : '#10b981',
+                                                fontWeight: '600'
+                                            }}>→</span>
+                                            {item}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+            );
+        };
+
+        const Footer = () => (
+            <footer style={{
+                padding: '40px',
+                borderTop: '1px solid var(--border-color)',
+                textAlign: 'center'
+            }}>
+                <div style={{ marginBottom: '16px' }}>
+                    <span style={{ 
+                        fontSize: '24px', 
+                        fontWeight: '700',
+                        background: 'linear-gradient(90deg, #f59e0b, #ef4444)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent'
+                    }}>
+                        आत्मनिर्भर भारत
+                    </span>
+                </div>
+                <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginBottom: '8px' }}>
+                    Strategic Mineral Dependency Tracker • Atmanirbhar Bharat Ideathon 2025
+                </p>
+                <p style={{ color: 'var(--text-muted)', fontSize: '12px' }}>
+                    Built for India's self-reliance in critical minerals
+                </p>
+            </footer>
+        );
+
+        // Main App Component
+        const App = () => {
+            const [selectedMineral, setSelectedMineral] = useState(null);
+            const [mineralData, setMineralData] = useState([]);
+            const [geopoliticalEvents, setGeopoliticalEvents] = useState([]);
+            const [policyRecommendations, setPolicyRecommendations] = useState([]);
+            const [loading, setLoading] = useState(true);
+            const [error, setError] = useState(null);
+
+            useEffect(() => {
+                const fetchData = async () => {
+                    try {
+                        setLoading(true);
+                        
+                        const [mineralsRes, eventsRes, policyRes] = await Promise.all([
+                            fetch('http://localhost:5000/api/minerals'),
+                            fetch('http://localhost:5000/api/events'),
+                            fetch('http://localhost:5000/api/policy')
+                        ]);
+                        
+                        if (!mineralsRes.ok || !eventsRes.ok || !policyRes.ok) {
+                            throw new Error('Failed to fetch data from API. Make sure Flask server is running at http://localhost:5000');
+                        }
+                        
+                        const mineralsData = await mineralsRes.json();
+                        const eventsData = await eventsRes.json();
+                        const policyData = await policyRes.json();
+                        
+                        setMineralData(mineralsData);
+                        setGeopoliticalEvents(eventsData);
+                        setPolicyRecommendations(policyData);
+                        setLoading(false);
+                        
+                        const firstCritical = mineralsData.find(m => m.riskLevel === 'critical');
+                        if (firstCritical) setSelectedMineral(firstCritical);
+                        
+                        console.log('✅ Data loaded from API:', mineralsData.length, 'minerals');
+                    } catch (error) {
+                        console.error('❌ Error loading data:', error);
+                        setError(error.message);
+                        setLoading(false);
+                    }
+                };
+                
+                fetchData();
+            }, []);
+
+            if (loading) {
+                return (
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        height: '100vh',
+                        flexDirection: 'column',
+                        gap: '20px'
+                    }}>
+                        <div style={{
+                            width: '60px',
+                            height: '60px',
+                            border: '4px solid rgba(59, 130, 246, 0.2)',
+                            borderTopColor: '#3b82f6',
+                            borderRadius: '50%',
+                            animation: 'spin 1s linear infinite'
+                        }} />
+                        <p style={{ color: 'var(--text-secondary)' }}>Loading mineral data from database...</p>
+                    </div>
+                );
+            }
+
+            if (error) {
+                return (
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        height: '100vh',
+                        flexDirection: 'column',
+                        gap: '20px',
+                        padding: '40px'
+                    }}>
+                        <div style={{ fontSize: '48px' }}>⚠️</div>
+                        <h2 style={{ color: '#ef4444' }}>Failed to Load Data</h2>
+                        <p style={{ color: 'var(--text-secondary)', textAlign: 'center', maxWidth: '500px' }}>
+                            {error}
+                        </p>
+                        <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
+                            Make sure Flask API is running at http://localhost:5000
+                        </p>
+                        <button 
+                            onClick={() => window.location.reload()} 
+                            style={{
+                                padding: '12px 24px',
+                                background: '#3b82f6',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                                fontSize: '14px',
+                                fontWeight: '600'
+                            }}
+                        >
+                            Retry
+                        </button>
+                    </div>
+                );
+            }
+
+            return (
+                <div>
+                    <Header />
+                    <HeroSection mineralData={mineralData} />
+                    <OverviewStats mineralData={mineralData} />
+                    <MineralsSection 
+                        mineralData={mineralData}
+                        selectedMineral={selectedMineral} 
+                        setSelectedMineral={setSelectedMineral} 
+                    />
+                    <RiskMatrix mineralData={mineralData} />
+                    <GeopoliticalTimeline events={geopoliticalEvents} />
+                    <PolicyRecommendations recommendations={policyRecommendations} />
+                    <Footer />
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

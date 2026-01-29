@@ -1,0 +1,7 @@
+flask==3.0.0
+flask-cors==4.0.0
+pandas==2.1.4
+numpy==1.26.3
+scikit-learn==1.4.0
+sqlalchemy==2.0.25
+gunicorn==21.2.0

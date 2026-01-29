@@ -1,0 +1,11 @@
+mineral_id,name,category,china_dependency_pct,strategic_importance,total_import_2023_usd_millions,domestic_production_mt,key_applications,alternative_sources,current_reserves_india_mt
+1,Lithium,Battery Metals,70,9.5,450,50,"EV batteries|Electronics|Energy storage","Australia|Chile|Argentina",1600
+2,Cobalt,Battery Metals,65,9.0,380,20,"Batteries|Superalloys|Magnets","DRC|Australia|Canada",0
+3,Rare Earth Elements,Technology Metals,85,9.8,520,5,"Electronics|Defense|Clean energy","USA|Australia|Vietnam",6900000
+4,Graphite,Battery Metals,75,8.5,290,35000,"Battery anodes|Steel|Lubricants","Madagascar|Mozambique|Canada",11000000
+5,Nickel,Base Metals,40,8.0,1200,2000,"Stainless steel|Batteries|Alloys","Indonesia|Philippines|Russia",175000000
+6,Copper,Base Metals,30,7.5,8500,15000,"Electronics|Construction|Power","Chile|Peru|USA",190000000
+7,Manganese,Ferroalloys,50,7.8,650,1800,"Steel production|Batteries|Chemicals","South Africa|Australia|Gabon",300000000
+8,Tungsten,Strategic Metals,80,9.2,180,50,"Defense|Cutting tools|Electronics","Russia|Bolivia|Vietnam",87000
+9,Vanadium,Specialty Metals,60,8.8,120,80,"Steel alloys|Energy storage|Aerospace","South Africa|Russia|Brazil",8000000
+10,Chromium,Ferroalloys,45,8.0,450,4100,"Stainless steel|Chemicals|Refractory","South Africa|Kazakhstan|Turkey",215000000
