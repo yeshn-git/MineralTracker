@@ -1,11 +1,11 @@
-mineral_id,name,category,china_dependency_pct,strategic_importance,total_import_2023_usd_millions,domestic_production_mt,key_applications,alternative_sources,current_reserves_india_mt
-1,Lithium,Battery Metals,70,9.5,450,50,"EV batteries|Electronics|Energy storage","Australia|Chile|Argentina",1600
-2,Cobalt,Battery Metals,65,9.0,380,20,"Batteries|Superalloys|Magnets","DRC|Australia|Canada",0
-3,Rare Earth Elements,Technology Metals,85,9.8,520,5,"Electronics|Defense|Clean energy","USA|Australia|Vietnam",6900000
-4,Graphite,Battery Metals,75,8.5,290,35000,"Battery anodes|Steel|Lubricants","Madagascar|Mozambique|Canada",11000000
-5,Nickel,Base Metals,40,8.0,1200,2000,"Stainless steel|Batteries|Alloys","Indonesia|Philippines|Russia",175000000
-6,Copper,Base Metals,30,7.5,8500,15000,"Electronics|Construction|Power","Chile|Peru|USA",190000000
-7,Manganese,Ferroalloys,50,7.8,650,1800,"Steel production|Batteries|Chemicals","South Africa|Australia|Gabon",300000000
-8,Tungsten,Strategic Metals,80,9.2,180,50,"Defense|Cutting tools|Electronics","Russia|Bolivia|Vietnam",87000
-9,Vanadium,Specialty Metals,60,8.8,120,80,"Steel alloys|Energy storage|Aerospace","South Africa|Russia|Brazil",8000000
-10,Chromium,Ferroalloys,45,8.0,450,4100,"Stainless steel|Chemicals|Refractory","South Africa|Kazakhstan|Turkey",215000000
+mineral_id,name,category,china_dependency_pct,total_import_pct,domestic_production_mt,current_reserves_india_mt,strategic_importance,key_applications,alternative_sources
+1,Lithium,Battery Metals,75,100,0,5900,9,EV Batteries|Grid Storage|Electronics,Australia|Chile|Argentina
+2,Rare Earth Elements,Critical Minerals,98,100,0,6900000,10,Defense Systems|Wind Turbines|EVs|Electronics,Australia|USA|Vietnam
+3,Cobalt,Battery Metals,47,95,15000,40000,8,Li-ion Batteries|Superalloys|Catalysts,DRC|Australia|Canada
+4,Graphite,Battery Metals,68,85,35000,8000000,7,EV Anodes|Nuclear Reactors|Lubricants,Madagascar|Brazil|Mozambique
+5,Nickel,Battery Metals,35,70,180000,190000,7,EV Batteries|Stainless Steel|Superalloys,Indonesia|Philippines|Russia
+6,Gallium,Semiconductor Metals,100,100,0,0,9,Semiconductors|LEDs|Solar Cells|5G,Japan|Germany|Ukraine
+7,Germanium,Semiconductor Metals,95,98,1000,0,8,Fiber Optics|IR Optics|Solar Cells,Belgium|USA|Canada
+8,Tungsten,Strategic Metals,85,92,1200,150000,8,Defense|Cutting Tools|Electronics,Vietnam|Russia|Bolivia
+9,Vanadium,Strategic Metals,65,80,3000,20000,7,Steel Alloys|Grid Storage|Aerospace,South Africa|Russia|Brazil
+10,Antimony,Strategic Metals,75,88,500,90000,6,Flame Retardants|Lead Batteries|Ammunition,Bolivia|Russia|Tajikistan

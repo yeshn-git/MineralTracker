@@ -7,28 +7,35 @@
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #0a0e17;
-            --bg-secondary: #111827;
-            --bg-card: #1a2234;
-            --bg-card-hover: #1f2937;
-            --accent-danger: #ef4444;
-            --accent-warning: #f59e0b;
-            --accent-success: #10b981;
-            --accent-info: #3b82f6;
-            --accent-purple: #8b5cf6;
-            --accent-cyan: #06b6d4;
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --text-muted: #64748b;
-            --border-color: #2d3748;
-            --gradient-danger: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-            --gradient-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-            --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            --gradient-info: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-            --gradient-hero: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            --alert-red: #ef4444;
+            --bg-primary: #030205;
+            --bg-secondary: #070709;
+            --bg-card: #0e0f10;
+            --bg-card-hover: #151617;
+
+            /* Indian tricolor palette */
+            --saffron: #FF6F00;
+            --saffron-strong: #FF8A00;
+            --india-green: #138808;
+            --india-navy: #0B3D91;
+            --india-white: #ffffff;
+
+            --accent-saffron: var(--saffron);
+            --accent-saffron-strong: var(--saffron-strong);
+            --accent-green: var(--india-green);
+            --accent-navy: var(--india-navy);
+
+            --text-primary: #f6f7f9;
+            --text-secondary: #b6c2cc;
+            --text-muted: #8c98a4;
+            --border-color: #131516;
+
+            --gradient-saffron: linear-gradient(135deg, var(--saffron), var(--saffron-strong));
+            --gradient-navy: linear-gradient(135deg, var(--india-navy), rgba(11,61,145,0.7));
+            --gradient-hero: linear-gradient(135deg, rgba(2,2,6,0.6), rgba(4,4,12,0.85));
         }
 
         * {
@@ -38,11 +45,13 @@
         }
 
         body {
-            font-family: 'Outfit', sans-serif;
+            font-family: 'Inter', sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             min-height: 100vh;
             overflow-x: hidden;
+            -webkit-font-smoothing:antialiased;
+            -moz-osx-font-smoothing:grayscale;
         }
 
         .bg-pattern {
@@ -53,10 +62,30 @@
             height: 100%;
             pointer-events: none;
             z-index: 0;
-            background-image: 
-                radial-gradient(ellipse at 20% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
-                radial-gradient(ellipse at 50% 50%, rgba(6, 182, 212, 0.05) 0%, transparent 60%);
+            /* three soft blurred tricolor glows */
+            background-image:
+                radial-gradient(circle at 10% 20%, rgba(255,111,0,0.16) 0%, transparent 28%),
+                radial-gradient(circle at 50% 70%, rgba(255,255,255,0.06) 0%, transparent 30%),
+                radial-gradient(circle at 90% 30%, rgba(19,136,8,0.12) 0%, transparent 28%);
+            filter: blur(28px);
+            opacity: 0.95;
+        }
+
+        /* bold blurred paint-stroke for Indian flag (orange - white - green) */
+        .flag-stroke {
+            position: fixed;
+            left: -18%;
+            top: 6%;
+            width: 140%;
+            height: 220px;
+            pointer-events: none;
+            z-index: 0;
+            background: linear-gradient(90deg, var(--saffron) 0% 33%, var(--india-white) 33% 66%, var(--india-green) 66% 100%);
+            transform: rotate(-12deg) skewX(-8deg);
+            border-radius: 80px;
+            filter: blur(44px) saturate(150%);
+            opacity: 0.95;
+            mix-blend-mode: screen;
         }
 
         .grid-overlay {
@@ -67,10 +96,11 @@
             height: 100%;
             pointer-events: none;
             z-index: 0;
-            background-image: 
+            background-image:
                 linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
                 linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-            background-size: 60px 60px;
+            background-size: 160px 160px;
+            mix-blend-mode: overlay;
         }
 
         #root {
@@ -94,34 +124,19 @@
         }
 
         @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(8px) scale(0.995); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         @keyframes pulse-glow {
-            0%, 100% {
-                box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
-            }
-            50% {
-                box-shadow: 0 0 40px rgba(239, 68, 68, 0.5);
-            }
+            0% { box-shadow: 0 0 0px rgba(239,68,68,0); }
+            50% { box-shadow: 0 0 20px rgba(239,68,68,0.24); }
+            100% { box-shadow: 0 0 0px rgba(239,68,68,0); }
         }
 
         @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
+            from { opacity: 0; transform: translateX(-12px); }
+            to { opacity: 1; transform: translateX(0); }
         }
 
         @keyframes spin {
@@ -129,11 +144,11 @@
         }
 
         .animate-fade-in {
-            animation: fadeInUp 0.6s ease-out forwards;
+            animation: fadeInUp 0.42s cubic-bezier(.2,.9,.25,1) forwards;
         }
 
         .animate-slide-in {
-            animation: slideIn 0.5s ease-out forwards;
+            animation: slideIn 0.42s cubic-bezier(.2,.9,.25,1) forwards;
         }
 
         .stagger-1 { animation-delay: 0.1s; opacity: 0; }
@@ -142,10 +157,32 @@
         .stagger-4 { animation-delay: 0.4s; opacity: 0; }
         .stagger-5 { animation-delay: 0.5s; opacity: 0; }
         .stagger-6 { animation-delay: 0.6s; opacity: 0; }
+
+        /* Minimal card hover style for a subtle lift and glow */
+        .mineral-card {
+            transition: transform 240ms cubic-bezier(.2,.9,.25,1), box-shadow 240ms ease, background-color 180ms ease;
+            will-change: transform, box-shadow;
+        }
+        .mineral-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 8px 24px rgba(2,6,23,0.6), 0 2px 6px rgba(0,0,0,0.6);
+            background: var(--bg-card-hover);
+        }
+
+        .matrix-point {
+            transition: transform 200ms cubic-bezier(.2,.9,.25,1), box-shadow 200ms ease;
+            will-change: transform, box-shadow;
+        }
+        .matrix-point:hover {
+            transform: translate(-50%, 50%) scale(1.18);
+            box-shadow: 0 10px 30px rgba(2,6,23,0.6);
+            z-index: 20;
+        }
     </style>
 </head>
 <body>
-    <div class="bg-pattern"></div>
+                        <div class="bg-pattern"></div>
+    <div class="flag-stroke" aria-hidden="true"></div>
     <div class="grid-overlay"></div>
     <div id="root"></div>
 
@@ -156,10 +193,10 @@
 
         const RiskBadge = ({ level }) => {
             const styles = {
-                critical: { bg: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.4)' },
-                high: { bg: 'rgba(245, 158, 11, 0.2)', color: '#f59e0b', border: '1px solid rgba(245, 158, 11, 0.4)' },
-                moderate: { bg: 'rgba(59, 130, 246, 0.2)', color: '#3b82f6', border: '1px solid rgba(59, 130, 246, 0.4)' },
-                low: { bg: 'rgba(16, 185, 129, 0.2)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.4)' }
+                critical: { bg: 'rgba(239,68,68,0.18)', color: 'var(--alert-red)', border: '1px solid rgba(239,68,68,0.32)' },
+                high: { bg: 'rgba(255,138,0,0.14)', color: 'var(--saffron-strong)', border: '1px solid rgba(255,138,0,0.28)' },
+                moderate: { bg: 'rgba(11,61,145,0.14)', color: 'var(--india-navy)', border: '1px solid rgba(11,61,145,0.26)' },
+                low: { bg: 'rgba(19,136,8,0.14)', color: 'var(--india-green)', border: '1px solid rgba(19,136,8,0.26)' }
             };
             const style = styles[level] || styles.moderate;
             
@@ -187,9 +224,9 @@
                 stable: '→'
             };
             const colors = {
-                increasing: '#ef4444',
-                decreasing: '#10b981',
-                stable: '#f59e0b'
+                increasing: 'var(--saffron)',
+                decreasing: 'var(--india-green)',
+                stable: 'var(--india-navy)'
             };
             return (
                 <span style={{ color: colors[trend], fontWeight: '600', fontSize: '16px' }}>
@@ -217,7 +254,7 @@
                         height: '100%',
                         backgroundColor: color,
                         borderRadius: '4px',
-                        transition: 'width 1s ease-out'
+                        transition: 'width 800ms cubic-bezier(.2,.9,.25,1)'
                     }} />
                 </div>
             </div>
@@ -238,7 +275,8 @@
                     right: '-20px',
                     width: '100px',
                     height: '100px',
-                    background: `radial-gradient(circle, ${color}20 0%, transparent 70%)`,
+                    background: `radial-gradient(circle, ${color} 0%, rgba(0,0,0,0) 70%)`,
+                    opacity: 0.14,
                     borderRadius: '50%'
                 }} />
                 <div style={{ fontSize: '28px', marginBottom: '12px' }}>{icon}</div>
@@ -269,7 +307,7 @@
                     <div style={{
                         width: '48px',
                         height: '48px',
-                        background: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)',
+                        background: 'linear-gradient(135deg, var(--saffron), var(--india-navy))',
                         borderRadius: '12px',
                         display: 'flex',
                         alignItems: 'center',
@@ -290,9 +328,9 @@
                 <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
                     <div style={{
                         padding: '8px 16px',
-                        background: 'rgba(239, 68, 68, 0.15)',
+                        background: 'rgba(239,68,68,0.12)',
                         borderRadius: '8px',
-                        border: '1px solid rgba(239, 68, 68, 0.3)',
+                        border: '1px solid rgba(239,68,68,0.22)',
                         display: 'flex',
                         alignItems: 'center',
                         gap: '8px'
@@ -300,17 +338,15 @@
                         <div style={{
                             width: '8px',
                             height: '8px',
-                            background: '#ef4444',
+                            background: 'var(--alert-red)',
                             borderRadius: '50%',
                             animation: 'pulse-glow 2s infinite'
                         }} />
-                        <span style={{ fontSize: '13px', fontWeight: '500', color: '#ef4444' }}>
+                        <span style={{ fontSize: '13px', fontWeight: '500', color: 'var(--alert-red)' }}>
                             HIGH DEPENDENCY ALERT
                         </span>
                     </div>
-                    <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-                        Last Updated: {new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                    </div>
+                    
                 </div>
             </header>
         );
@@ -329,28 +365,29 @@
                     position: 'relative',
                     overflow: 'hidden'
                 }}>
-                    <div style={{
-                        position: 'absolute',
-                        top: '50%',
-                        right: '10%',
-                        transform: 'translateY(-50%)',
-                        width: '400px',
-                        height: '400px',
-                        background: 'radial-gradient(circle, rgba(239, 68, 68, 0.1) 0%, transparent 70%)',
-                        borderRadius: '50%',
-                        filter: 'blur(60px)'
-                    }} />
+                        <div style={{
+                            position: 'absolute',
+                            top: '50%',
+                            right: '10%',
+                            transform: 'translateY(-50%)',
+                            width: '420px',
+                            height: '420px',
+                            background: 'radial-gradient(circle, rgba(255,111,0,0.14) 0%, transparent 65%)',
+                            borderRadius: '50%',
+                            filter: 'blur(64px)',
+                            opacity: 0.95
+                        }} />
                     
                     <div style={{ maxWidth: '800px', position: 'relative', zIndex: 1 }}>
                         <div className="animate-fade-in" style={{
                             display: 'inline-block',
                             padding: '6px 16px',
-                            background: 'rgba(245, 158, 11, 0.15)',
+                            background: 'rgba(255,111,0,0.12)',
                             borderRadius: '20px',
-                            border: '1px solid rgba(245, 158, 11, 0.3)',
+                            border: '1px solid rgba(255,111,0,0.2)',
                             marginBottom: '20px'
                         }}>
-                            <span style={{ fontSize: '12px', fontWeight: '600', color: '#f59e0b', letterSpacing: '1px' }}>
+                            <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--saffron-strong)', letterSpacing: '1px' }}>
                                 🎯 ATMANIRBHAR BHARAT IDEATHON 2025
                             </span>
                         </div>
@@ -365,7 +402,7 @@
                             India's Critical Mineral
                             <br />
                             <span style={{ 
-                                background: 'linear-gradient(90deg, #ef4444, #f59e0b)',
+                                background: 'linear-gradient(90deg, var(--saffron), var(--india-navy))',
                                 WebkitBackgroundClip: 'text',
                                 WebkitTextFillColor: 'transparent'
                             }}>
@@ -386,44 +423,44 @@
                         
                         <div className="animate-fade-in stagger-3" style={{ display: 'flex', gap: '16px' }}>
                             <div style={{
-                                padding: '16px 24px',
-                                background: 'var(--bg-card)',
-                                borderRadius: '12px',
-                                border: '1px solid var(--border-color)'
-                            }}>
-                                <div style={{ fontSize: '32px', fontWeight: '700', color: '#ef4444', fontFamily: 'JetBrains Mono' }}>
-                                    {avgDependency}%
+                                    padding: '16px 24px',
+                                    background: 'var(--bg-card)',
+                                    borderRadius: '12px',
+                                    border: '1px solid var(--border-color)'
+                                }}>
+                                    <div style={{ fontSize: '32px', fontWeight: '700', color: 'var(--saffron)', fontFamily: 'JetBrains Mono' }}>
+                                        {avgDependency}%
+                                    </div>
+                                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                                        Avg. China Dependency
+                                    </div>
                                 </div>
-                                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
-                                    Avg. China Dependency
+                                <div style={{
+                                    padding: '16px 24px',
+                                    background: 'var(--bg-card)',
+                                    borderRadius: '12px',
+                                    border: '1px solid var(--border-color)'
+                                }}>
+                                    <div style={{ fontSize: '32px', fontWeight: '700', color: 'var(--saffron-strong)', fontFamily: 'JetBrains Mono' }}>
+                                        {criticalCount}
+                                    </div>
+                                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                                        Critical Risk Minerals
+                                    </div>
                                 </div>
-                            </div>
-                            <div style={{
-                                padding: '16px 24px',
-                                background: 'var(--bg-card)',
-                                borderRadius: '12px',
-                                border: '1px solid var(--border-color)'
-                            }}>
-                                <div style={{ fontSize: '32px', fontWeight: '700', color: '#f59e0b', fontFamily: 'JetBrains Mono' }}>
-                                    {criticalCount}
+                                <div style={{
+                                    padding: '16px 24px',
+                                    background: 'var(--bg-card)',
+                                    borderRadius: '12px',
+                                    border: '1px solid var(--border-color)'
+                                }}>
+                                    <div style={{ fontSize: '32px', fontWeight: '700', color: 'var(--india-navy)', fontFamily: 'JetBrains Mono' }}>
+                                        ₹2.8L Cr
+                                    </div>
+                                    <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                                        Annual Import Value
+                                    </div>
                                 </div>
-                                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
-                                    Critical Risk Minerals
-                                </div>
-                            </div>
-                            <div style={{
-                                padding: '16px 24px',
-                                background: 'var(--bg-card)',
-                                borderRadius: '12px',
-                                border: '1px solid var(--border-color)'
-                            }}>
-                                <div style={{ fontSize: '32px', fontWeight: '700', color: '#3b82f6', fontFamily: 'JetBrains Mono' }}>
-                                    ₹2.8L Cr
-                                </div>
-                                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
-                                    Annual Import Value
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </section>
@@ -445,7 +482,7 @@
                             value={mineralData.length}
                             subtitle="Strategic & Critical"
                             icon="⚗️"
-                            color="#3b82f6"
+                            color="#0B3D91"
                             delay={1}
                         />
                         <StatCard
@@ -453,7 +490,7 @@
                             value={mineralData.filter(m => m.riskLevel === 'critical').length}
                             subtitle="Immediate attention required"
                             icon="🚨"
-                            color="#ef4444"
+                            color="#FF6F00"
                             delay={2}
                         />
                         <StatCard
@@ -461,7 +498,7 @@
                             value={mineralData.filter(m => m.riskLevel === 'high').length}
                             subtitle="Elevated concern"
                             icon="⚠️"
-                            color="#f59e0b"
+                            color="#FF8A00"
                             delay={3}
                         />
                         <StatCard
@@ -469,7 +506,7 @@
                             value="32/100"
                             subtitle="Resilience index"
                             icon="🛡️"
-                            color="#8b5cf6"
+                            color="#138808"
                             delay={4}
                         />
                     </div>
@@ -480,6 +517,7 @@
         const MineralCard = ({ mineral, onClick, isSelected }) => (
             <div
                 onClick={() => onClick(mineral)}
+                className="mineral-card"
                 style={{
                     background: isSelected ? 'var(--bg-card-hover)' : 'var(--bg-card)',
                     borderRadius: '16px',
@@ -490,8 +528,6 @@
                     position: 'relative',
                     overflow: 'hidden'
                 }}
-                onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-4px)'}
-                onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
             >
                 <div style={{
                     position: 'absolute',
@@ -499,8 +535,8 @@
                     left: 0,
                     width: '4px',
                     height: '100%',
-                    background: mineral.riskLevel === 'critical' ? '#ef4444' : 
-                               mineral.riskLevel === 'high' ? '#f59e0b' : '#3b82f6'
+                    background: mineral.riskLevel === 'critical' ? 'var(--alert-red)' : 
+                               mineral.riskLevel === 'high' ? 'var(--saffron-strong)' : 'var(--india-navy)'
                 }} />
                 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
@@ -529,26 +565,26 @@
                 
                 <ProgressBar
                     value={mineral.chinaImport}
-                    color={mineral.chinaImport > 80 ? '#ef4444' : mineral.chinaImport > 60 ? '#f59e0b' : '#10b981'}
+                    color={mineral.chinaImport > 80 ? 'var(--alert-red)' : mineral.chinaImport > 60 ? 'var(--saffron-strong)' : 'var(--india-green)'}
                     label="China Import Dependency"
                 />
                 
                 <div style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>
                     <div style={{ flex: 1 }}>
                         <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px' }}>Supply Risk</div>
-                        <div style={{ fontSize: '20px', fontWeight: '700', color: '#ef4444', fontFamily: 'JetBrains Mono' }}>
+                        <div style={{ fontSize: '20px', fontWeight: '700', color: 'var(--alert-red)', fontFamily: 'JetBrains Mono' }}>
                             {mineral.supplyChainRisk}%
                         </div>
                     </div>
                     <div style={{ flex: 1 }}>
                         <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px' }}>Domestic</div>
-                        <div style={{ fontSize: '20px', fontWeight: '700', color: '#10b981', fontFamily: 'JetBrains Mono' }}>
+                        <div style={{ fontSize: '20px', fontWeight: '700', color: 'var(--india-green)', fontFamily: 'JetBrains Mono' }}>
                             {mineral.domesticProduction}%
                         </div>
                     </div>
                     <div style={{ flex: 1 }}>
                         <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '4px' }}>Volatility</div>
-                        <div style={{ fontSize: '20px', fontWeight: '700', color: '#f59e0b', fontFamily: 'JetBrains Mono' }}>
+                        <div style={{ fontSize: '20px', fontWeight: '700', color: 'var(--saffron-strong)', fontFamily: 'JetBrains Mono' }}>
                             {mineral.priceVolatility}%
                         </div>
                     </div>
@@ -615,41 +651,41 @@
                         marginBottom: '28px'
                     }}>
                         <div style={{
-                            background: 'rgba(239, 68, 68, 0.1)',
+                            background: 'rgba(255,111,0,0.12)',
                             borderRadius: '12px',
                             padding: '16px',
-                            border: '1px solid rgba(239, 68, 68, 0.2)'
+                            border: '1px solid rgba(255,111,0,0.22)'
                         }}>
                             <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                                 China Dependency
                             </div>
-                            <div style={{ fontSize: '32px', fontWeight: '700', color: '#ef4444', fontFamily: 'JetBrains Mono' }}>
+                            <div style={{ fontSize: '32px', fontWeight: '700', color: 'var(--saffron)', fontFamily: 'JetBrains Mono' }}>
                                 {mineral.chinaImport}%
                             </div>
                         </div>
                         <div style={{
-                            background: 'rgba(245, 158, 11, 0.1)',
+                            background: 'rgba(255,138,0,0.10)',
                             borderRadius: '12px',
                             padding: '16px',
-                            border: '1px solid rgba(245, 158, 11, 0.2)'
+                            border: '1px solid rgba(255,138,0,0.18)'
                         }}>
                             <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                                 Total Import
                             </div>
-                            <div style={{ fontSize: '32px', fontWeight: '700', color: '#f59e0b', fontFamily: 'JetBrains Mono' }}>
+                            <div style={{ fontSize: '32px', fontWeight: '700', color: 'var(--saffron-strong)', fontFamily: 'JetBrains Mono' }}>
                                 {mineral.totalImport}%
                             </div>
                         </div>
                         <div style={{
-                            background: 'rgba(16, 185, 129, 0.1)',
+                            background: 'rgba(19,136,8,0.08)',
                             borderRadius: '12px',
                             padding: '16px',
-                            border: '1px solid rgba(16, 185, 129, 0.2)'
+                            border: '1px solid rgba(19,136,8,0.16)'
                         }}>
                             <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                                 Domestic Production
                             </div>
-                            <div style={{ fontSize: '32px', fontWeight: '700', color: '#10b981', fontFamily: 'JetBrains Mono' }}>
+                            <div style={{ fontSize: '32px', fontWeight: '700', color: 'var(--india-green)', fontFamily: 'JetBrains Mono' }}>
                                 {mineral.domesticProduction}%
                             </div>
                         </div>
@@ -662,15 +698,15 @@
                         <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px', height: '80px' }}>
                             {mineral.yearlyData.map((value, index) => (
                                 <div key={index} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                    <div style={{
-                                        width: '100%',
-                                        height: `${value * 0.8}px`,
-                                        background: index === mineral.yearlyData.length - 1 
-                                            ? 'linear-gradient(180deg, #ef4444 0%, #dc2626 100%)'
-                                            : 'rgba(239, 68, 68, 0.3)',
-                                        borderRadius: '4px 4px 0 0',
-                                        transition: 'height 0.5s ease'
-                                    }} />
+                                                <div style={{
+                                                    width: '100%',
+                                                    height: `${value * 0.8}px`,
+                                                    background: index === mineral.yearlyData.length - 1 
+                                                        ? 'linear-gradient(180deg, var(--saffron) 0%, var(--saffron-strong) 100%)'
+                                                        : 'rgba(255,111,0,0.32)',
+                                                    borderRadius: '4px 4px 0 0',
+                                                    transition: 'height 420ms cubic-bezier(.2,.9,.25,1)'
+                                                }} />
                                     <span style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '8px' }}>
                                         {2020 + index}
                                     </span>
@@ -687,11 +723,11 @@
                             {mineral.strategicUse.map((use, index) => (
                                 <span key={index} style={{
                                     padding: '6px 14px',
-                                    background: 'rgba(59, 130, 246, 0.1)',
-                                    border: '1px solid rgba(59, 130, 246, 0.3)',
+                                    background: 'rgba(11,61,145,0.08)',
+                                    border: '1px solid rgba(11,61,145,0.18)',
                                     borderRadius: '20px',
                                     fontSize: '12px',
-                                    color: '#3b82f6'
+                                    color: 'var(--india-navy)'
                                 }}>
                                     {use}
                                 </span>
@@ -712,7 +748,7 @@
                                     marginBottom: '8px',
                                     fontSize: '13px',
                                     color: 'var(--text-primary)',
-                                    borderLeft: '3px solid #10b981'
+                                    borderLeft: '3px solid var(--india-green)'
                                 }}>
                                     {initiative}
                                 </li>
@@ -732,7 +768,7 @@
                                     border: '1px solid rgba(139, 92, 246, 0.3)',
                                     borderRadius: '20px',
                                     fontSize: '12px',
-                                    color: '#8b5cf6'
+                                    color: 'var(--india-navy)'
                                 }}>
                                     {alt}
                                 </span>
@@ -781,6 +817,7 @@
             );
         };
 
+        // Risk Matrix Section
         const RiskMatrix = ({ mineralData }) => {
             if (!mineralData || mineralData.length === 0) return null;
             
@@ -824,9 +861,9 @@
                         </div>
                         
                         <div style={{
-                            width: '100%',
+                            width: 'calc(100% - 80px)',
                             height: '400px',
-                            marginLeft: '40px',
+                            marginLeft: '60px',
                             marginBottom: '40px',
                             position: 'relative',
                             background: `
@@ -834,7 +871,8 @@
                                 linear-gradient(to top, rgba(16, 185, 129, 0.1) 0%, rgba(245, 158, 11, 0.1) 50%, rgba(239, 68, 68, 0.1) 100%)
                             `,
                             borderRadius: '8px',
-                            border: '1px solid var(--border-color)'
+                            border: '1px solid var(--border-color)',
+                            overflow: 'hidden'
                         }}>
                             {[25, 50, 75].map(pos => (
                                 <React.Fragment key={pos}>
@@ -857,48 +895,52 @@
                                 </React.Fragment>
                             ))}
                             
-                            {mineralData.map(mineral => (
-                                <div
-                                    key={mineral.id}
-                                    style={{
-                                        position: 'absolute',
-                                        left: `${mineral.chinaImport}%`,
-                                        bottom: `${mineral.supplyChainRisk}%`,
-                                        transform: 'translate(-50%, 50%)',
-                                        width: '40px',
-                                        height: '40px',
-                                        borderRadius: '50%',
-                                        background: mineral.riskLevel === 'critical' ? 'rgba(239, 68, 68, 0.8)' :
-                                                   mineral.riskLevel === 'high' ? 'rgba(245, 158, 11, 0.8)' : 'rgba(59, 130, 246, 0.8)',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        fontSize: '11px',
-                                        fontWeight: '600',
-                                        cursor: 'pointer',
-                                        transition: 'transform 0.2s',
-                                        border: '2px solid rgba(255,255,255,0.2)'
-                                    }}
-                                    onMouseEnter={e => e.currentTarget.style.transform = 'translate(-50%, 50%) scale(1.2)'}
-                                    onMouseLeave={e => e.currentTarget.style.transform = 'translate(-50%, 50%) scale(1)'}
-                                    title={`${mineral.name}: ${mineral.chinaImport}% China Dep., ${mineral.supplyChainRisk}% Risk`}
-                                >
-                                    {mineral.symbol}
-                                </div>
-                            ))}
+                            {mineralData.map(mineral => {
+                                const xPos = Math.min(Math.max(mineral.chinaImport, 8), 92);
+                                const yPos = Math.min(Math.max(mineral.supplyChainRisk, 8), 92);
+                                
+                                    return (
+                                    <div
+                                        key={mineral.id}
+                                        className="matrix-point"
+                                        style={{
+                                            position: 'absolute',
+                                            left: `${xPos}%`,
+                                            bottom: `${yPos}%`,
+                                            transform: 'translate(-50%, 50%)',
+                                            width: '40px',
+                                            height: '40px',
+                                            borderRadius: '50%',
+                                            background: mineral.riskLevel === 'critical' ? 'rgba(239,68,68,0.92)' :
+                                                       mineral.riskLevel === 'high' ? 'rgba(255,138,0,0.88)' : 'rgba(11,61,145,0.88)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            fontSize: '11px',
+                                            fontWeight: '600',
+                                            cursor: 'pointer',
+                                            border: '2px solid rgba(255,255,255,0.12)',
+                                            zIndex: 10
+                                        }}
+                                        title={`${mineral.name}: ${mineral.chinaImport}% China Dep., ${mineral.supplyChainRisk}% Risk`}
+                                    >
+                                        {mineral.symbol}
+                                    </div>
+                                );
+                            })}
                         </div>
                         
                         <div style={{ display: 'flex', justifyContent: 'center', gap: '32px', marginTop: '16px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#ef4444' }} />
+                                <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'var(--alert-red)' }} />
                                 <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Critical</span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#f59e0b' }} />
+                                <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'var(--saffron-strong)' }} />
                                 <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>High</span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: '#3b82f6' }} />
+                                <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: 'var(--india-navy)' }} />
                                 <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Moderate</span>
                             </div>
                         </div>
@@ -906,7 +948,7 @@
                 </section>
             );
         };
-
+        
         const GeopoliticalTimeline = ({ events }) => {
             if (!events || events.length === 0) return null;
             
@@ -946,9 +988,9 @@
                                 <div style={{
                                     width: '4px',
                                     borderRadius: '2px',
-                                    background: event.impact === 'critical' ? '#ef4444' :
-                                               event.impact === 'high' ? '#f59e0b' :
-                                               event.impact === 'positive' ? '#10b981' : '#3b82f6'
+                                    background: event.impact === 'critical' ? 'var(--alert-red)' :
+                                               event.impact === 'high' ? 'var(--saffron-strong)' :
+                                               event.impact === 'positive' ? 'var(--india-green)' : 'var(--india-navy)'
                                 }} />
                                 <div style={{ flex: 1 }}>
                                     <div style={{ fontSize: '15px', fontWeight: '500', marginBottom: '8px' }}>
@@ -978,9 +1020,9 @@
                                         background: event.impact === 'critical' ? 'rgba(239, 68, 68, 0.2)' :
                                                    event.impact === 'high' ? 'rgba(245, 158, 11, 0.2)' :
                                                    event.impact === 'positive' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(59, 130, 246, 0.2)',
-                                        color: event.impact === 'critical' ? '#ef4444' :
-                                              event.impact === 'high' ? '#f59e0b' :
-                                              event.impact === 'positive' ? '#10b981' : '#3b82f6'
+                                                color: event.impact === 'critical' ? 'var(--alert-red)' :
+                                                    event.impact === 'high' ? 'var(--saffron-strong)' :
+                                                    event.impact === 'positive' ? 'var(--india-green)' : 'var(--india-navy)'
                                     }}>
                                         {event.impact}
                                     </span>
@@ -1026,7 +1068,7 @@
                                     <span style={{
                                         fontSize: '12px',
                                         fontWeight: '600',
-                                        color: index === 0 ? '#ef4444' : index === 1 ? '#f59e0b' : '#10b981'
+                                        color: index === 0 ? 'var(--saffron)' : index === 1 ? 'var(--saffron-strong)' : 'var(--india-green)'
                                     }}>
                                         {rec.category}
                                     </span>
@@ -1044,7 +1086,7 @@
                                             gap: '12px'
                                         }}>
                                             <span style={{
-                                                color: index === 0 ? '#ef4444' : index === 1 ? '#f59e0b' : '#10b981',
+                                                color: index === 0 ? 'var(--saffron)' : index === 1 ? 'var(--saffron-strong)' : 'var(--india-green)',
                                                 fontWeight: '600'
                                             }}>→</span>
                                             {item}
@@ -1068,7 +1110,7 @@
                     <span style={{ 
                         fontSize: '24px', 
                         fontWeight: '700',
-                        background: 'linear-gradient(90deg, #f59e0b, #ef4444)',
+                        background: 'linear-gradient(90deg, var(--saffron-strong), var(--saffron))',
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent'
                     }}>
@@ -1076,7 +1118,7 @@
                     </span>
                 </div>
                 <p style={{ color: 'var(--text-muted)', fontSize: '14px', marginBottom: '8px' }}>
-                    Strategic Mineral Dependency Tracker • Atmanirbhar Bharat Ideathon 2025
+                    Strategic Mineral Dependency Tracker
                 </p>
                 <p style={{ color: 'var(--text-muted)', fontSize: '12px' }}>
                     Built for India's self-reliance in critical minerals
@@ -1144,8 +1186,8 @@
                         <div style={{
                             width: '60px',
                             height: '60px',
-                            border: '4px solid rgba(59, 130, 246, 0.2)',
-                            borderTopColor: '#3b82f6',
+                            border: '4px solid rgba(11,61,145,0.18)',
+                            borderTopColor: 'var(--india-navy)',
                             borderRadius: '50%',
                             animation: 'spin 1s linear infinite'
                         }} />
@@ -1166,7 +1208,7 @@
                         padding: '40px'
                     }}>
                         <div style={{ fontSize: '48px' }}>⚠️</div>
-                        <h2 style={{ color: '#ef4444' }}>Failed to Load Data</h2>
+                        <h2 style={{ color: 'var(--alert-red)' }}>Failed to Load Data</h2>
                         <p style={{ color: 'var(--text-secondary)', textAlign: 'center', maxWidth: '500px' }}>
                             {error}
                         </p>
@@ -1177,7 +1219,7 @@
                             onClick={() => window.location.reload()} 
                             style={{
                                 padding: '12px 24px',
-                                background: '#3b82f6',
+                                background: 'var(--india-navy)',
                                 color: 'white',
                                 border: 'none',
                                 borderRadius: '8px',
